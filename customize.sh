@@ -95,11 +95,6 @@ else
   fi
 fi
 
-
-
-
-
-
 else
   ui_print "[!] /system/vendor/build.prop not found on your Device, Skipping..."
 fi
@@ -115,14 +110,45 @@ else
   ui_print "Failed to Grant Permission, Skipping..."
 fi
 
+#!/bin/bash
 
+# Path to the input file
+input_file=/$MODPATH/system/vendor/build.prop
+# Path to the output file (you can overwrite the original file if needed)
+output_file=/$MODPATH/system/vendor/buildtemp.prop
 
+# Create or clear the output file
+> $output_file
+chmod 777 /$MODPATH/system/vendor/buildtemp.prop
+# Read the file line by line
+while IFS= read -r line; do
+  # Check if the line starts with "allo"
+	if [[ $line == ro.zygote* ]]; then
+    # Replace the line with "bye"
+    echo "ro.zygote=zygote64_32" >> "$output_file"
+	ui_print ro.zygote=zygote64_32
+	elif [[ $line == ro.vendor.product.cpu.abilist=* ]]; then
+    # Replace the line with "beee"
+    echo "ro.vendor.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi" >> "$output_file"
+	ui_print ro.vendor.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi
+	elif [[ $line == ro.vendor.product.cpu.abilist32=* ]]; then
+    # Replace the line with "beee"
+    echo "ro.vendor.product.cpu.abilist32=armeabi-v7a,armeabi" >> "$output_file"
+	ui_print ro.vendor.product.cpu.abilist32=armeabi-v7a,armeabi
+	else
+    # Write the original line to the output file
+    echo "$line" >> "$output_file"
+	ui_print $line
+  fi
+done < $input_file
+
+# Optionally, replace the original file with the output file
+#mv $output_file $input_file
+mv $output_file /system/vendor/build.prop
 
 ui_print "[*] All Done."
     ui_print "[*] Reboot to apply the changes"
     ui_print "[*] All edits to build.prop will be systemlessly performed"
     ui_print "[*] If there is an issue, just disable or uninstall this module and the changes will be reverted"
-
-
 
 ui_print "[*] Sucessfully installed"
